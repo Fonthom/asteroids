@@ -7,11 +7,32 @@ from asteroidfield import AsteroidField
 from asteroid import Asteroid
 from shot import Shot
 
+def load_high_score():
+    try:
+        with open(HIGH_SCORE_FILE, "r") as f:
+            return int(f.read())
+    except (FileNotFoundError, ValueError):
+        return 0
+
+def save_high_score(score):
+    high_score = load_high_score()
+    if score > high_score:
+        with open(HIGH_SCORE_FILE, "w") as f:
+            f.write(str(score))
+
+def draw_hud(screen, score, high_score, font):
+    score_text = font.render(f"Score: {score}", True, "white")
+    high_score_text = font.render(f"Best: {high_score}", True, "yellow")
+    screen.blit(score_text, (10, 10))
+    screen.blit(high_score_text, (10, 40))
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 36)
+    score = 0
+    high_score = load_high_score()
     dt = 0
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
@@ -37,12 +58,13 @@ def main():
 
         for asteroid in asteroids:
             if asteroid.collides_with(player):
-                log_event("player_hit")
-                print("Game over!")
+                save_high_score(score)
+                print(f"Game over! Score: {score}")
                 sys.exit()
             for shot in shots:
                 if asteroid.collides_with(shot):
                     log_event("asteroid_shot")
+                    score += POINTS_PER_ASTEROID
                     shot.kill()
                     asteroid.split()
         
@@ -50,6 +72,7 @@ def main():
 
         for obj in drawable:
             obj.draw(screen)
+        draw_hud(screen, score, high_score, font)
         pygame.display.flip()
         dt = clock.tick(60) / 1000
         
