@@ -8,7 +8,7 @@ def main():
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
     print("Screen width:", SCREEN_WIDTH)
     print("Screen height:", SCREEN_HEIGHT)
-    While True:
+    while True:
         log_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
